@@ -1,9 +1,9 @@
 import type { Metadata } from "next";
 import { Poppins, Iceberg } from "next/font/google";
 import "./globals.css";
-import Footer from "@/components/footer";
-import { ThemeProvider } from "@/components/theme-provider";
-import Header from "@/components/header";
+import Footer from "@/components/layout/footer";
+import { ThemeProvider } from "@/components/ui/theme-provider";
+import Header from "@/components/layout/header";
 
 const poppins = Poppins({
   variable: "--font-poppins",
@@ -40,7 +40,7 @@ export default function RootLayout({
         >
           <div className="flex min-h-screen flex-col">
             <Header />
-            {children}
+            <div className="flex-1">{children}</div>
             <Footer />
           </div>
         </ThemeProvider>

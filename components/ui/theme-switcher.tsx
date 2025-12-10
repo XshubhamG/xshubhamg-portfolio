@@ -1,42 +1,49 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { MoonIcon, SunIcon } from "@radix-ui/react-icons";
 import { useTheme } from "next-themes";
-import { SunIcon, MoonIcon } from "@radix-ui/react-icons";
+import { Button } from "@base-ui-components/react";
+import { useEffect, useRef, useState } from "react";
 import { flushSync } from "react-dom";
+import { cn } from "@/lib/utils";
+import { isFirefox, animateFirefox } from "@/lib/utils";
 
-const ThemeSwitcher = () => {
+export function ThemeToggle() {
   const { setTheme, resolvedTheme } = useTheme();
-  const [mounted, setMounted] = useState(false);
   const buttonRef = useRef<HTMLButtonElement>(null);
+  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
     setMounted(true);
   }, []);
 
-  if (!mounted) {
-    return <div className="h-8 w-8" />;
-  }
-
   const toggleTheme = async () => {
-    if (
-      !buttonRef.current ||
-      !document.startViewTransition ||
-      window.matchMedia("(prefers-reduced-motion: reduce)").matches
-    ) {
-      setTheme(resolvedTheme === "dark" ? "light" : "dark");
-      return;
-    }
+    const nextTheme = resolvedTheme === "dark" ? "light" : "dark";
 
-    await document.startViewTransition(() =>
-      flushSync(() => setTheme(resolvedTheme === "dark" ? "light" : "dark")),
-    ).ready;
+    const isSupported =
+      document.startViewTransition !== undefined &&
+      !window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
-    const { top, left, width, height } =
-      buttonRef.current.getBoundingClientRect();
+    if (!mounted || !isSupported) return setTheme(nextTheme);
+
+    if (isFirefox()) return await animateFirefox(nextTheme);
+    return await animateChromium(nextTheme);
+  };
+
+  const animateChromium = async (nextTheme: string) => {
+    const button = buttonRef.current;
+    if (!button) return;
+
+    const { top, left, width, height } = button.getBoundingClientRect();
     const right = window.innerWidth - left;
     const bottom = window.innerHeight - top;
     const maxRadius = Math.hypot(Math.max(left, right), Math.max(top, bottom));
+
+    const transition = document.startViewTransition(() => {
+      flushSync(() => setTheme(nextTheme));
+    });
+
+    await transition.ready;
 
     document.documentElement.animate(
       {
@@ -46,28 +53,41 @@ const ThemeSwitcher = () => {
         ],
       },
       {
-        duration: 500,
+        duration: 700,
         easing: "ease-in-out",
         pseudoElement: "::view-transition-new(root)",
       },
     );
   };
 
+  if (!mounted) return <div className="size-11" />;
+
+  const isDark = resolvedTheme === "dark";
+
   return (
-    <button
-      onClick={toggleTheme}
+    <Button
       ref={buttonRef}
-      className="relative h-8 w-8 cursor-pointer transition-all duration-300 hover:-translate-y-1"
+      onClick={toggleTheme}
+      className={cn(
+        "hover:bg-highlight-high relative flex size-11 items-center justify-center rounded-md border border-transparent",
+        "focus-visible:ring-highlight-high transition-colors focus-visible:ring-1 focus-visible:outline-none",
+      )}
       aria-label="Toggle theme"
     >
-      {resolvedTheme === "dark" ? (
-        <SunIcon className="h-6 w-6" />
-      ) : (
-        <MoonIcon className="h-6 w-6" />
-      )}
-      <span className="sr-only">Toggle theme</span>
-    </button>
+      <div className="relative flex items-center justify-center">
+        <SunIcon
+          className={cn(
+            "absolute size-6 scale-100 rotate-0 transition-all duration-300",
+            isDark ? "scale-100 rotate-0" : "scale-0 rotate-90",
+          )}
+        />
+        <MoonIcon
+          className={cn(
+            "absolute size-6 scale-0 rotate-90 transition-all duration-300",
+            isDark ? "scale-0 -rotate-90" : "scale-100 rotate-0",
+          )}
+        />
+      </div>
+    </Button>
   );
-};
-
-export default ThemeSwitcher;
+}
