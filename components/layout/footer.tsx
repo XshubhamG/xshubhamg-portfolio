@@ -3,12 +3,10 @@ import Copyright from "../ui/copyright";
 
 const Footer = () => {
   return (
-    <footer className="bg-surface border-subtle/50 border-t px-6 py-8 sm:px-8 lg:px-12">
-      <div className="mx-auto w-full">
-        <div className="flex flex-col items-center justify-center gap-5 py-4 sm:flex-row sm:justify-between">
-          <Copyright />
-          <SocialLinks />
-        </div>
+    <footer className="bg-surface border-subtle/50 border-t">
+      <div className="flex w-full flex-col items-center justify-center gap-5 px-2 py-6 sm:flex-row sm:justify-between sm:px-6 lg:container lg:px-4">
+        <Copyright />
+        <SocialLinks />
       </div>
     </footer>
   );

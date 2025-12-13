@@ -71,11 +71,13 @@ const Header = () => {
   }, [mobileMenuOpen]);
 
   return (
-    <header className="fixed inset-x-0 top-0 z-50" aria-label="Main navigation">
+    <header
+      className="bg-surface/90 border-subtle/50 fixed inset-x-0 top-0 z-50 border-b backdrop-blur-md"
+      aria-label="Main navigation"
+    >
       <div
         className={cn(
-          "mx-auto flex w-full items-center justify-between px-6 py-4 transition-all duration-300 sm:px-8 lg:px-12",
-          "border-subtle/50 bg-surface/90 border-b backdrop-blur-md",
+          "flex w-full items-center justify-between px-2 py-4 transition-all duration-300 sm:px-6 lg:container lg:px-4",
           isScrolled && "shadow-lg",
         )}
       >
